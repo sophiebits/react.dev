@@ -1,14 +1,14 @@
 /*
  * Copyright (c) Facebook, Inc. and its affiliates.
  */
+'use client';
 
 import {useState} from 'react';
-import {useRouter} from 'next/router';
 import {ga} from '../../utils/analytics';
+import {usePathname} from 'next/navigation';
 
 export function Feedback({onSubmit = () => {}}: {onSubmit?: () => void}) {
-  const {asPath} = useRouter();
-  const cleanedPath = asPath.split(/[\?\#]/)[0];
+  const cleanedPath = usePathname();
   // Reset on route changes.
   return <SendFeedback key={cleanedPath} onSubmit={onSubmit} />;
 }

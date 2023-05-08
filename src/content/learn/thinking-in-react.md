@@ -47,7 +47,7 @@ There are five components on this screen:
 
 <FullWidth>
 
-<CodeDiagram flip>
+<CodeDiagram>
 
 <img src="/images/docs/s_thinking-in-react_ui_outline.png" width="500" style={{margin: '0 auto'}} />
 

@@ -1,6 +1,7 @@
 /*
  * Copyright (c) Facebook, Inc. and its affiliates.
  */
+'use client';
 
 import {Page} from 'components/Layout/Page';
 import {MDXComponents} from 'components/MDX/MDXComponents';
@@ -10,17 +11,19 @@ const {Intro, MaxWidth, p: P, a: A} = MDXComponents;
 
 export default function NotFound() {
   return (
-    <Page toc={[]} meta={{title: 'Not Found'}} routeTree={sidebarLearn}>
+    <Page
+      toc={[]}
+      routeTree={sidebarLearn}
+      meta={{title: 'Something Went Wrong'}}>
       <MaxWidth>
         <Intro>
-          <P>This page doesn’t exist.</P>
+          <P>Something went very wrong.</P>
+          <P>Sorry about that.</P>
           <P>
-            If this is a mistake{', '}
+            If you’d like, please{' '}
             <A href="https://github.com/reactjs/react.dev/issues/new">
-              let us know
+              report a bug.
             </A>
-            {', '}
-            and we will try to fix it!
           </P>
         </Intro>
       </MaxWidth>

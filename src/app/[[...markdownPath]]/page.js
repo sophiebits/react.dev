@@ -2,23 +2,19 @@
  * Copyright (c) Facebook, Inc. and its affiliates.
  */
 
-import {Fragment, useMemo} from 'react';
-import {useRouter} from 'next/router';
 import {MDXComponents} from 'components/MDX/MDXComponents';
 import {Page} from 'components/Layout/Page';
-import sidebarHome from '../sidebarHome.json';
-import sidebarLearn from '../sidebarLearn.json';
-import sidebarReference from '../sidebarReference.json';
-import sidebarCommunity from '../sidebarCommunity.json';
-import sidebarBlog from '../sidebarBlog.json';
+import sidebarHome from '../../sidebarHome.json';
+import sidebarLearn from '../../sidebarLearn.json';
+import sidebarReference from '../../sidebarReference.json';
+import sidebarCommunity from '../../sidebarCommunity.json';
+import sidebarBlog from '../../sidebarBlog.json';
 
-export default function Layout({content, toc, meta}) {
-  const parsedContent = useMemo(
-    () => JSON.parse(content, reviveNodeOnClient),
-    [content]
-  );
-  const parsedToc = useMemo(() => JSON.parse(toc, reviveNodeOnClient), [toc]);
-  const section = useActiveSection();
+export default async function Layout({params: {markdownPath = []}}) {
+  const {content, toc, meta} = (await getStaticProps(markdownPath)).props;
+  const parsedContent = JSON.parse(content, reviveNodeOnClient);
+  const parsedToc = JSON.parse(toc, reviveNodeOnClient);
+  const section = getActiveSection(markdownPath);
   let routeTree;
   switch (section) {
     case 'home':
@@ -38,25 +34,30 @@ export default function Layout({content, toc, meta}) {
       routeTree = sidebarBlog;
       break;
   }
+  const path = '/' + markdownPath.join('/');
   return (
-    <Page toc={parsedToc} routeTree={routeTree} meta={meta} section={section}>
+    <Page
+      path={path}
+      toc={parsedToc}
+      routeTree={routeTree}
+      meta={meta}
+      section={section}>
       {parsedContent}
     </Page>
   );
 }
 
-function useActiveSection() {
-  const {asPath} = useRouter();
-  const cleanedPath = asPath.split(/[\?\#]/)[0];
+function getActiveSection(markdownPath) {
+  const cleanedPath = '/' + markdownPath.join('/');
   if (cleanedPath === '/') {
     return 'home';
   } else if (cleanedPath.startsWith('/reference')) {
     return 'reference';
-  } else if (asPath.startsWith('/learn')) {
+  } else if (cleanedPath.startsWith('/learn')) {
     return 'learn';
-  } else if (asPath.startsWith('/community')) {
+  } else if (cleanedPath.startsWith('/community')) {
     return 'community';
-  } else if (asPath.startsWith('/blog')) {
+  } else if (cleanedPath.startsWith('/blog')) {
     return 'blog';
   } else {
     return 'unknown';
@@ -100,17 +101,17 @@ const DISK_CACHE_BREAKER = 7;
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 // Put MDX output into JSON for client.
-export async function getStaticProps(context) {
+async function getStaticProps(markdownPath) {
   const fs = require('fs');
   const {
     prepareMDX,
     PREPARE_MDX_CACHE_BREAKER,
-  } = require('../utils/prepareMDX');
+  } = require('../../utils/prepareMDX');
   const rootDir = process.cwd() + '/src/content/';
   const mdxComponentNames = Object.keys(MDXComponents);
 
   // Read MDX from the file.
-  let path = (context.params.markdownPath || []).join('/') || 'index';
+  let path = markdownPath.join('/') || 'index';
   let mdx;
   try {
     mdx = fs.readFileSync(rootDir + path + '.md', 'utf8');
@@ -159,7 +160,7 @@ export async function getStaticProps(context) {
       .join('\n');
 
   // Turn the MDX we just read into some JS we can execute.
-  const {remarkPlugins} = require('../../plugins/markdownToHtml');
+  const {remarkPlugins} = require('../../../plugins/markdownToHtml');
   const {compile: compileMdx} = await import('@mdx-js/mdx');
   const visit = (await import('unist-util-visit')).default;
   const jsxCode = await compileMdx(mdxWithFakeImports, {
@@ -183,8 +184,8 @@ export async function getStaticProps(context) {
   });
   const {transform} = require('@babel/core');
   const jsCode = await transform(jsxCode, {
-    plugins: ['@babel/plugin-transform-modules-commonjs'],
-    presets: ['@babel/preset-react'],
+    plugins: [require('@babel/plugin-transform-modules-commonjs')],
+    presets: [require('@babel/preset-react')],
   }).code;
 
   // Prepare environment for MDX.
@@ -247,7 +248,7 @@ export async function getStaticProps(context) {
 }
 
 // Collect all MDX files for static generation.
-export async function getStaticPaths() {
+export async function generateStaticParams() {
   const {promisify} = require('util');
   const {resolve} = require('path');
   const fs = require('fs');
@@ -280,17 +281,13 @@ export async function getStaticPaths() {
   }
 
   const files = await getFiles(rootDir);
-  const paths = files.map((file) => ({
-    params: {
-      markdownPath: getSegments(file),
-      // ^^^ CAREFUL HERE.
-      // If you rename markdownPath, update patches/next-remote-watch.patch too.
-      // Otherwise you'll break Fast Refresh for all MD files.
-    },
+  return files.map((file) => ({
+    markdownPath: getSegments(file),
+    // ^^^ CAREFUL HERE.
+    // If you rename markdownPath, update patches/next-remote-watch.patch too.
+    // Otherwise you'll break Fast Refresh for all MD files.
   }));
-
-  return {
-    paths: paths,
-    fallback: false,
-  };
 }
+
+export const dynamic = 'force-static';
+export const dynamicParams = false;

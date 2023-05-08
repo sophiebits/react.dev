@@ -4,12 +4,12 @@
 
 import Head from 'next/head';
 import Link from 'next/link';
-import Router from 'next/router';
 import {lazy, useCallback, useEffect} from 'react';
 import * as React from 'react';
 import {createPortal} from 'react-dom';
 import {siteConfig} from 'siteConfig';
 import cn from 'classnames';
+import {useRouter} from 'next/navigation';
 
 export interface SearchProps {
   appId?: string;
@@ -98,6 +98,7 @@ export function Search({
     hitsPerPage: 5,
   },
 }: SearchProps) {
+  const router = useRouter();
   useDocSearchKeyboardEvents({isOpen, onOpen, onClose});
   return (
     <>
@@ -116,7 +117,7 @@ export function Search({
             onClose={onClose}
             navigator={{
               navigate({itemUrl}: any) {
-                Router.push(itemUrl);
+                router.push(itemUrl);
               },
             }}
             transformItems={(items: any[]) => {

@@ -1,10 +1,9 @@
 /*
  * Copyright (c) Facebook, Inc. and its affiliates.
  */
+'use client';
 
 import {useEffect} from 'react';
-import {AppProps} from 'next/app';
-import {useRouter} from 'next/router';
 import {ga} from '../utils/analytics';
 
 import '@docsearch/css';
@@ -23,9 +22,7 @@ if (typeof window !== 'undefined') {
   });
 }
 
-export default function MyApp({Component, pageProps}: AppProps) {
-  const router = useRouter();
-
+export default function MyApp({children}: {children: React.ReactNode}) {
   useEffect(() => {
     // Taken from StackOverflow. Trying to detect both Safari desktop and mobile.
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
@@ -42,16 +39,23 @@ export default function MyApp({Component, pageProps}: AppProps) {
   }, []);
 
   useEffect(() => {
-    const handleRouteChange = (url: string) => {
-      const cleanedUrl = url.split(/[\?\#]/)[0];
-      ga('set', 'page', cleanedUrl);
-      ga('send', 'pageview');
+    // If only we had router events. But patching pushState is what Vercel Analytics does.
+    // https://va.vercel-scripts.com/v1/script.debug.js
+    const originalPushState = history.pushState;
+    history.pushState = function (...args) {
+      const oldCleanedUrl = window.location.href.split(/[\?\#]/)[0];
+      originalPushState.apply(history, args);
+      const newCleanedUrl = window.location.href.split(/[\?\#]/)[0];
+      if (oldCleanedUrl !== newCleanedUrl) {
+        ga('set', 'page', newCleanedUrl);
+        ga('send', 'pageview');
+      }
     };
-    router.events.on('routeChangeComplete', handleRouteChange);
     return () => {
-      router.events.off('routeChangeComplete', handleRouteChange);
+      history.pushState = originalPushState;
     };
-  }, [router.events]);
+  }, []);
 
-  return <Component {...pageProps} />;
+  // Not really but let's pretend
+  return children as React.ReactElement;
 }

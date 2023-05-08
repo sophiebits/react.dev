@@ -4,7 +4,6 @@
 
 import {Suspense} from 'react';
 import * as React from 'react';
-import {useRouter} from 'next/router';
 import {SidebarNav} from './SidebarNav';
 import {Footer} from './Footer';
 import {Toc} from './Toc';
@@ -15,7 +14,7 @@ import ButtonLink from 'components/ButtonLink';
 import {IconNavArrow} from 'components/Icon/IconNavArrow';
 import PageHeading from 'components/PageHeading';
 import {getRouteMeta} from './getRouteMeta';
-import {TocContext} from '../MDX/TocContext';
+import {TocContextProvider} from '../MDX/TocContext';
 import type {TocItem} from 'components/MDX/TocContext';
 import type {RouteItem} from 'components/Layout/getRouteMeta';
 import {HomeContent} from './HomeContent';
@@ -25,6 +24,7 @@ import cn from 'classnames';
 import(/* webpackPrefetch: true */ '../MDX/CodeBlock/CodeBlock');
 
 interface PageProps {
+  path: string;
   children: React.ReactNode;
   toc: Array<TocItem>;
   routeTree: RouteItem;
@@ -32,9 +32,15 @@ interface PageProps {
   section: 'learn' | 'reference' | 'community' | 'blog' | 'home' | 'unknown';
 }
 
-export function Page({children, toc, routeTree, meta, section}: PageProps) {
-  const {asPath} = useRouter();
-  const cleanedPath = asPath.split(/[\?\#]/)[0];
+export function Page({
+  path,
+  children,
+  toc,
+  routeTree,
+  meta,
+  section,
+}: PageProps) {
+  const cleanedPath = path.split(/[\?\#]/)[0];
   const {route, nextRoute, prevRoute, breadcrumbs, order} = getRouteMeta(
     cleanedPath,
     routeTree
@@ -67,7 +73,7 @@ export function Page({children, toc, routeTree, meta, section}: PageProps) {
               'max-w-7xl mx-auto',
               section === 'blog' && 'lg:flex lg:flex-col lg:items-center'
             )}>
-            <TocContext.Provider value={toc}>{children}</TocContext.Provider>
+            <TocContextProvider value={toc}>{children}</TocContextProvider>
           </div>
           {!isBlogIndex && (
             <DocsPageFooter
@@ -104,6 +110,7 @@ export function Page({children, toc, routeTree, meta, section}: PageProps) {
   return (
     <>
       <Seo
+        path={path}
         title={title}
         isHomePage={isHomePage}
         image={`/images/og-` + section + '.png'}
@@ -136,7 +143,7 @@ export function Page({children, toc, routeTree, meta, section}: PageProps) {
           <main className="min-w-0 isolate">
             <article
               className="break-words font-normal text-primary dark:text-primary-dark"
-              key={asPath}>
+              key={path}>
               {content}
             </article>
             <div
@@ -186,7 +193,7 @@ export function Page({children, toc, routeTree, meta, section}: PageProps) {
           </main>
         </Suspense>
         <div className="-mt-16 hidden lg:max-w-xs 2xl:block">
-          {showToc && toc.length > 0 && <Toc headings={toc} key={asPath} />}
+          {showToc && toc.length > 0 && <Toc headings={toc} key={path} />}
         </div>
       </div>
     </>

@@ -1,6 +1,7 @@
 /*
  * Copyright (c) Facebook, Inc. and its affiliates.
  */
+'use client';
 
 import {lazy, memo, Children, Suspense} from 'react';
 import {createFileMap} from './createFileMap';

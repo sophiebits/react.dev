@@ -1,6 +1,7 @@
 /*
  * Copyright (c) Facebook, Inc. and its affiliates.
  */
+'use client';
 
 import {useRef} from 'react';
 import * as React from 'react';

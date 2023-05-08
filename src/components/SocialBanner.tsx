@@ -2,6 +2,7 @@
  * Copyright (c) Facebook, Inc. and its affiliates.
  *
  */
+'use client';
 
 import {useRef, useEffect} from 'react';
 import cn from 'classnames';

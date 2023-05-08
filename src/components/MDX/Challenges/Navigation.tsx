@@ -5,7 +5,7 @@
 import {useRef, useCallback, useEffect, createRef} from 'react';
 import cn from 'classnames';
 import {IconChevron} from 'components/Icon/IconChevron';
-import {ChallengeContents} from './Challenges';
+import {ChallengeContents} from './ChallengesClient';
 import {debounce} from 'debounce';
 
 export function Navigation({

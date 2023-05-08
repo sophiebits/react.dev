@@ -5,7 +5,7 @@
   "license": "CC",
   "scripts": {
     "analyze": "ANALYZE=true next build",
-    "dev": "next-remote-watch ./src/content",
+    "dev": "next dev",
     "build": "next build && node --experimental-modules ./scripts/downloadFonts.mjs",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
@@ -61,7 +61,7 @@
     "autoprefixer": "^10.4.2",
     "babel-eslint": "10.x",
     "eslint": "7.x",
-    "eslint-config-next": "12.0.3",
+    "eslint-config-next": "^13.4.1",
     "eslint-config-react-app": "^5.2.1",
     "eslint-plugin-flowtype": "4.x",
     "eslint-plugin-import": "2.x",

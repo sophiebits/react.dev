@@ -2,7 +2,7 @@
  * Copyright (c) Facebook, Inc. and its affiliates.
  */
 
-import {Children, useContext, useMemo} from 'react';
+import {Children} from 'react';
 import * as React from 'react';
 import cn from 'classnames';
 
@@ -16,7 +16,6 @@ import InlineCode from './InlineCode';
 import Intro from './Intro';
 import BlogCard from './BlogCard';
 import Link from './Link';
-import {PackageImport} from './PackageImport';
 import Recap from './Recap';
 import Sandpack from './Sandpack';
 import Diagram from './Diagram';
@@ -27,9 +26,14 @@ import YouWillLearnCard from './YouWillLearnCard';
 import {Challenges, Hint, Solution} from './Challenges';
 import {IconNavArrow} from '../Icon/IconNavArrow';
 import ButtonLink from 'components/ButtonLink';
-import {TocContext} from './TocContext';
-import type {Toc, TocItem} from './TocContext';
 import {TeamMember} from './TeamMember';
+import {
+  Illustration,
+  IllustrationContextProvider,
+  InlineToc,
+} from './MDXClientComponents';
+import {AuthorCredit} from './AuthorCredit';
+import {OL, UL, LI} from './Lists';
 
 function CodeStep({children, step}: {children: any; step: number}) {
   return (
@@ -59,16 +63,6 @@ const P = (p: JSX.IntrinsicElements['p']) => (
 
 const Strong = (strong: JSX.IntrinsicElements['strong']) => (
   <strong className="font-bold" {...strong} />
-);
-
-const OL = (p: JSX.IntrinsicElements['ol']) => (
-  <ol className="ml-6 my-3 list-decimal" {...p} />
-);
-const LI = (p: JSX.IntrinsicElements['li']) => (
-  <li className="leading-relaxed mb-1" {...p} />
-);
-const UL = (p: JSX.IntrinsicElements['ul']) => (
-  <ul className="ml-6 my-3 list-disc" {...p} />
 );
 
 const Divider = () => (
@@ -182,76 +176,6 @@ function Recipes(props: any) {
   return <Challenges {...props} isRecipes={true} />;
 }
 
-function AuthorCredit({
-  author = 'Rachel Lee Nabors',
-  authorLink = 'http://rachelnabors.com/',
-}: {
-  author: string;
-  authorLink: string;
-}) {
-  return (
-    <div className="sr-only group-hover:not-sr-only group-focus-within:not-sr-only hover:sr-only">
-      <p className="bg-card dark:bg-card-dark text-center text-sm text-secondary dark:text-secondary-dark leading-tight dark:text-secondary-dark p-2 rounded-lg absolute left-1/2 -top-4 -translate-x-1/2 -translate-y-full group-hover:flex group-hover:opacity-100 after:content-[''] after:absolute after:left-1/2 after:top-[95%] after:-translate-x-1/2 after:border-8 after:border-x-transparent after:border-b-transparent after:border-t-card after:dark:border-t-card-dark opacity-0 transition-opacity duration-300">
-        <cite>
-          Illustrated by{' '}
-          {authorLink ? (
-            <a
-              target="_blank"
-              rel="noreferrer"
-              className="text-link dark:text-link-dark"
-              href={authorLink}>
-              {author}
-            </a>
-          ) : (
-            author
-          )}
-        </cite>
-      </p>
-    </div>
-  );
-}
-
-const IllustrationContext = React.createContext<{
-  isInBlock?: boolean;
-}>({
-  isInBlock: false,
-});
-
-function Illustration({
-  caption,
-  src,
-  alt,
-  author,
-  authorLink,
-}: {
-  caption: string;
-  src: string;
-  alt: string;
-  author: string;
-  authorLink: string;
-}) {
-  const {isInBlock} = React.useContext(IllustrationContext);
-
-  return (
-    <div className="relative group before:absolute before:-inset-y-16 before:inset-x-0 my-16 mx-0 2xl:mx-auto max-w-4xl 2xl:max-w-6xl">
-      <figure className="my-8 flex justify-center">
-        <img
-          src={src}
-          alt={alt}
-          style={{maxHeight: 300}}
-          className="bg-white rounded-lg"
-        />
-        {caption ? (
-          <figcaption className="text-center leading-tight mt-4">
-            {caption}
-          </figcaption>
-        ) : null}
-      </figure>
-      {!isInBlock && <AuthorCredit author={author} authorLink={authorLink} />}
-    </div>
-  );
-}
-
 const isInBlockTrue = {isInBlock: true};
 
 function IllustrationBlock({
@@ -281,7 +205,7 @@ function IllustrationBlock({
     </figure>
   ));
   return (
-    <IllustrationContext.Provider value={isInBlockTrue}>
+    <IllustrationContextProvider value={isInBlockTrue}>
       <div className="relative group before:absolute before:-inset-y-16 before:inset-x-0 my-16 mx-0 2xl:mx-auto max-w-4xl 2xl:max-w-6xl">
         {sequential ? (
           <ol className="mdx-illustration-block flex">
@@ -296,60 +220,7 @@ function IllustrationBlock({
         )}
         <AuthorCredit author={author} authorLink={authorLink} />
       </div>
-    </IllustrationContext.Provider>
-  );
-}
-
-type NestedTocRoot = {
-  item: null;
-  children: Array<NestedTocNode>;
-};
-
-type NestedTocNode = {
-  item: TocItem;
-  children: Array<NestedTocNode>;
-};
-
-function calculateNestedToc(toc: Toc): NestedTocRoot {
-  const currentAncestors = new Map<number, NestedTocNode | NestedTocRoot>();
-  const root: NestedTocRoot = {
-    item: null,
-    children: [],
-  };
-  const startIndex = 1; // Skip "Overview"
-  for (let i = startIndex; i < toc.length; i++) {
-    const item = toc[i];
-    const currentParent: NestedTocNode | NestedTocRoot =
-      currentAncestors.get(item.depth - 1) || root;
-    const node: NestedTocNode = {
-      item,
-      children: [],
-    };
-    currentParent.children.push(node);
-    currentAncestors.set(item.depth, node);
-  }
-  return root;
-}
-
-function InlineToc() {
-  const toc = useContext(TocContext);
-  const root = useMemo(() => calculateNestedToc(toc), [toc]);
-  if (root.children.length < 2) {
-    return null;
-  }
-  return <InlineTocItem items={root.children} />;
-}
-
-function InlineTocItem({items}: {items: Array<NestedTocNode>}) {
-  return (
-    <UL>
-      {items.map((node) => (
-        <LI key={node.item.url}>
-          <Link href={node.item.url}>{node.item.text}</Link>
-          {node.children.length > 0 && <InlineTocItem items={node.children} />}
-        </LI>
-      ))}
-    </UL>
+    </IllustrationContextProvider>
   );
 }
 
@@ -415,7 +286,6 @@ export const MDXComponents = {
   Math,
   MathI,
   Note,
-  PackageImport,
   ReadBlogPost,
   Recap,
   Recipes,
@@ -434,6 +304,11 @@ export const MDXComponents = {
 for (let key in MDXComponents) {
   if (MDXComponents.hasOwnProperty(key)) {
     const MDXComponent: any = (MDXComponents as any)[key];
-    MDXComponent.mdxName = key;
+    try {
+      MDXComponent.mdxName = key;
+    } catch (e) {
+      // Can't assign this on a client reference. For now ignore here, and keep
+      // all components that read .mdxName on the client.
+    }
   }
 }

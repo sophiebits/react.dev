@@ -1,6 +1,7 @@
 /*
  * Copyright (c) Facebook, Inc. and its affiliates.
  */
+'use client';
 
 import {
   useState,
@@ -13,7 +14,6 @@ import {
 import * as React from 'react';
 import cn from 'classnames';
 import NextLink from 'next/link';
-import {useRouter} from 'next/router';
 import {disableBodyScroll, enableBodyScroll} from 'body-scroll-lock';
 
 import {IconClose} from 'components/Icon/IconClose';
@@ -25,6 +25,7 @@ import {Feedback} from '../Feedback';
 import {SidebarRouteTree} from '../Sidebar/SidebarRouteTree';
 import type {RouteItem} from '../getRouteMeta';
 import {SidebarLink} from '../Sidebar';
+import {usePathname} from 'next/navigation';
 
 declare global {
   interface Window {
@@ -145,7 +146,7 @@ export default function TopNav({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const scrollParentRef = useRef<HTMLDivElement>(null);
-  const {asPath} = useRouter();
+  const path = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
 
   // HACK. Fix up the data structures instead.
@@ -167,7 +168,7 @@ export default function TopNav({
   // Close the overlay on any navigation.
   useEffect(() => {
     setIsOpen(false);
-  }, [asPath]);
+  }, [path]);
 
   // Also close the overlay if the window gets resized past mobile layout.
   // (This is also important because we don't want to keep the body locked!)

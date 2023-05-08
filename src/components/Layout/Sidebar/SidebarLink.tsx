@@ -9,6 +9,7 @@ import * as React from 'react';
 import cn from 'classnames';
 import {IconNavArrow} from 'components/Icon/IconNavArrow';
 import Link from 'next/link';
+import {useRouter} from 'next/navigation';
 
 interface SidebarLinkProps {
   href: string;
@@ -19,7 +20,19 @@ interface SidebarLinkProps {
   icon?: React.ReactNode;
   isExpanded?: boolean;
   hideArrow?: boolean;
-  isPending: boolean;
+}
+
+function isModifiedEvent(event: React.MouseEvent): boolean {
+  const eventTarget = event.currentTarget as HTMLAnchorElement | SVGAElement;
+  const target = eventTarget.getAttribute('target');
+  return (
+    (target && target !== '_self') ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey || // triggers resource download
+    (event.nativeEvent && event.nativeEvent.which === 2)
+  );
 }
 
 export function SidebarLink({
@@ -30,7 +43,6 @@ export function SidebarLink({
   level,
   isExpanded,
   hideArrow,
-  isPending,
 }: SidebarLinkProps) {
   const ref = useRef<HTMLAnchorElement>(null);
 
@@ -44,6 +56,9 @@ export function SidebarLink({
     }
   }, [ref, selected]);
 
+  const router = useRouter();
+  const [isPending, startTransition] = React.useTransition();
+
   let target = '';
   if (href.startsWith('https://')) {
     target = '_blank';
@@ -55,6 +70,15 @@ export function SidebarLink({
       title={title}
       target={target}
       aria-current={selected ? 'page' : undefined}
+      onClick={(event) => {
+        if (isModifiedEvent(event)) {
+          return;
+        }
+        event.preventDefault();
+        startTransition(() => {
+          router.push(href);
+        });
+      }}
       className={cn(
         'p-2 pr-2 w-full rounded-none lg:rounded-r-2xl text-left hover:bg-gray-5 dark:hover:bg-gray-80 relative flex items-center justify-between',
         {

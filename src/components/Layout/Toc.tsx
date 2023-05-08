@@ -1,6 +1,7 @@
 /*
  * Copyright (c) Facebook, Inc. and its affiliates.
  */
+'use client';
 
 import cx from 'classnames';
 import {useTocHighlight} from './useTocHighlight';
