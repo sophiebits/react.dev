@@ -1,6 +1,7 @@
 /*
  * Copyright (c) Facebook, Inc. and its affiliates.
  */
+'use client'; // payload size
 
 import {Fragment} from 'react';
 import Link from 'next/link';

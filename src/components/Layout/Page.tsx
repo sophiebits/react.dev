@@ -5,13 +5,11 @@
 import {Suspense} from 'react';
 import * as React from 'react';
 import {SidebarNav} from './SidebarNav';
-import {Footer} from './Footer';
+import {PageFooter} from './Footer';
 import {Toc} from './Toc';
 import SocialBanner from '../SocialBanner';
 import {DocsPageFooter} from 'components/DocsFooter';
 import {Seo} from 'components/Seo';
-import ButtonLink from 'components/ButtonLink';
-import {IconNavArrow} from 'components/Icon/IconNavArrow';
 import PageHeading from 'components/PageHeading';
 import {getRouteMeta} from './getRouteMeta';
 import {TocContextProvider} from '../MDX/TocContext';
@@ -28,6 +26,7 @@ interface PageProps {
   children: React.ReactNode;
   toc: Array<TocItem>;
   routeTree: RouteItem;
+  clientRouteTree: RouteItem; // client reference
   meta: {title?: string; description?: string};
   section: 'learn' | 'reference' | 'community' | 'blog' | 'home' | 'unknown';
 }
@@ -37,6 +36,7 @@ export function Page({
   children,
   toc,
   routeTree,
+  clientRouteTree,
   meta,
   section,
 }: PageProps) {
@@ -119,7 +119,7 @@ export function Page({
       <SocialBanner />
       <TopNav
         section={section}
-        routeTree={routeTree}
+        routeTree={clientRouteTree}
         breadcrumbs={breadcrumbs}
       />
       <div
@@ -132,7 +132,7 @@ export function Page({
             <div className="lg:pt-16 fixed lg:sticky top-0 left-0 right-0 py-0 shadow lg:shadow-none">
               <SidebarNav
                 key={section}
-                routeTree={routeTree}
+                routeTree={clientRouteTree}
                 breadcrumbs={breadcrumbs}
               />
             </div>
@@ -146,50 +146,7 @@ export function Page({
               key={path}>
               {content}
             </article>
-            <div
-              className={cn(
-                'self-stretch w-full',
-                isHomePage && 'bg-wash dark:bg-gray-95 mt-[-1px]'
-              )}>
-              {!isHomePage && (
-                <div className="mx-auto w-full px-5 sm:px-12 md:px-12 pt-10 md:pt-12 lg:pt-10">
-                  {
-                    <hr className="max-w-7xl mx-auto border-border dark:border-border-dark" />
-                  }
-                  {showSurvey && (
-                    <>
-                      <div className="flex flex-col items-center m-4 p-4">
-                        <p className="font-bold text-primary dark:text-primary-dark text-lg mb-4">
-                          How do you like these docs?
-                        </p>
-                        <div>
-                          <ButtonLink
-                            href="https://www.surveymonkey.co.uk/r/PYRPF3X"
-                            className="mt-1"
-                            type="primary"
-                            size="md"
-                            target="_blank">
-                            Take our survey!
-                            <IconNavArrow
-                              displayDirection="right"
-                              className="inline ml-1"
-                            />
-                          </ButtonLink>
-                        </div>
-                      </div>
-                      <hr className="max-w-7xl mx-auto border-border dark:border-border-dark" />
-                    </>
-                  )}
-                </div>
-              )}
-              <div
-                className={cn(
-                  'py-12 px-5 sm:px-12 md:px-12 sm:py-12 md:py-16 lg:py-14',
-                  isHomePage && 'lg:pt-0'
-                )}>
-                <Footer />
-              </div>
-            </div>
+            <PageFooter isHomePage={isHomePage} showSurvey={showSurvey} />
           </main>
         </Suspense>
         <div className="-mt-16 hidden lg:max-w-xs 2xl:block">

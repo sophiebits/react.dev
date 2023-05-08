@@ -71,7 +71,8 @@ export function getRouteMeta(cleanedPath: string, routeTree: RouteItem) {
   const {currentIndex, ...meta} = ctx;
   return {
     ...meta,
-    breadcrumbs: breadcrumbs.length > 0 ? breadcrumbs : [routeTree],
+    breadcrumbs:
+      breadcrumbs.length > 0 ? breadcrumbs : [breadcrumbify(routeTree)],
   };
 }
 
@@ -128,7 +129,7 @@ function getBreadcrumbs(
   for (const route of currentRoute.routes) {
     const childRoute = getBreadcrumbs(path, route, [
       ...breadcrumbs,
-      currentRoute,
+      breadcrumbify(currentRoute),
     ]);
     if (childRoute?.length) {
       return childRoute;
@@ -136,4 +137,12 @@ function getBreadcrumbs(
   }
 
   return [];
+}
+
+function breadcrumbify(currentRoute: RouteItem): RouteItem {
+  return {
+    title: currentRoute.title,
+    path: currentRoute.path,
+    skipBreadcrumb: currentRoute.skipBreadcrumb,
+  };
 }

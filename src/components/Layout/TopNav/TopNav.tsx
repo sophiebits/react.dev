@@ -29,7 +29,6 @@ import {usePathname} from 'next/navigation';
 
 declare global {
   interface Window {
-    __theme: string;
     __setPreferredTheme: (theme: string) => void;
   }
 }

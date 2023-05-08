@@ -5,6 +5,7 @@
 import {Page} from 'components/Layout/Page';
 import {MDXComponents} from 'components/MDX/MDXComponents';
 import sidebarLearn from '../sidebarLearn.json';
+import {sidebarLearn as clientSidebarLearn} from '../clientRouteTrees';
 
 const {Intro, MaxWidth, p: P, a: A} = MDXComponents;
 
@@ -14,7 +15,8 @@ export default function NotFound() {
       path={''}
       toc={[]}
       meta={{title: 'Not Found'}}
-      routeTree={sidebarLearn}>
+      routeTree={sidebarLearn}
+      clientRouteTree={clientSidebarLearn}>
       <MaxWidth>
         <Intro>
           <P>This page doesn’t exist.</P>

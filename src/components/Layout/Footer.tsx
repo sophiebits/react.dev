@@ -1,6 +1,7 @@
 /*
  * Copyright (c) Facebook, Inc. and its affiliates.
  */
+'use client'; // payload size
 
 import * as React from 'react';
 import NextLink from 'next/link';
@@ -9,6 +10,63 @@ import {ExternalLink} from 'components/ExternalLink';
 import {IconFacebookCircle} from 'components/Icon/IconFacebookCircle';
 import {IconTwitter} from 'components/Icon/IconTwitter';
 import {IconGitHub} from 'components/Icon/IconGitHub';
+import ButtonLink from 'components/ButtonLink';
+import {IconNavArrow} from 'components/Icon/IconNavArrow';
+
+export function PageFooter({
+  isHomePage,
+  showSurvey,
+}: {
+  isHomePage: boolean;
+  showSurvey: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        'self-stretch w-full',
+        isHomePage && 'bg-wash dark:bg-gray-95 mt-[-1px]'
+      )}>
+      {!isHomePage && (
+        <div className="mx-auto w-full px-5 sm:px-12 md:px-12 pt-10 md:pt-12 lg:pt-10">
+          {
+            <hr className="max-w-7xl mx-auto border-border dark:border-border-dark" />
+          }
+          {showSurvey && (
+            <>
+              <div className="flex flex-col items-center m-4 p-4">
+                <p className="font-bold text-primary dark:text-primary-dark text-lg mb-4">
+                  How do you like these docs?
+                </p>
+                <div>
+                  <ButtonLink
+                    href="https://www.surveymonkey.co.uk/r/PYRPF3X"
+                    className="mt-1"
+                    type="primary"
+                    size="md"
+                    target="_blank">
+                    Take our survey!
+                    <IconNavArrow
+                      displayDirection="right"
+                      className="inline ml-1"
+                    />
+                  </ButtonLink>
+                </div>
+              </div>
+              <hr className="max-w-7xl mx-auto border-border dark:border-border-dark" />
+            </>
+          )}
+        </div>
+      )}
+      <div
+        className={cn(
+          'py-12 px-5 sm:px-12 md:px-12 sm:py-12 md:py-16 lg:py-14',
+          isHomePage && 'lg:pt-0'
+        )}>
+        <Footer />
+      </div>
+    </div>
+  );
+}
 
 export function Footer() {
   const socialLinkClasses = 'hover:text-primary dark:text-primary-dark';

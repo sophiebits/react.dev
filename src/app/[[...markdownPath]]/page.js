@@ -4,6 +4,13 @@
 
 import {MDXComponents} from 'components/MDX/MDXComponents';
 import {Page} from 'components/Layout/Page';
+import {
+  sidebarHome as clientSidebarHome,
+  sidebarLearn as clientSidebarLearn,
+  sidebarReference as clientSidebarReference,
+  sidebarCommunity as clientSidebarCommunity,
+  sidebarBlog as clientSidebarBlog,
+} from '../../clientRouteTrees';
 import sidebarHome from '../../sidebarHome.json';
 import sidebarLearn from '../../sidebarLearn.json';
 import sidebarReference from '../../sidebarReference.json';
@@ -16,22 +23,28 @@ export default async function Layout({params: {markdownPath = []}}) {
   const parsedToc = JSON.parse(toc, reviveNodeOnClient);
   const section = getActiveSection(markdownPath);
   let routeTree;
+  let clientRouteTree;
   switch (section) {
     case 'home':
     case 'unknown':
       routeTree = sidebarHome;
+      clientRouteTree = clientSidebarHome;
       break;
     case 'learn':
       routeTree = sidebarLearn;
+      clientRouteTree = clientSidebarLearn;
       break;
     case 'reference':
       routeTree = sidebarReference;
+      clientRouteTree = clientSidebarReference;
       break;
     case 'community':
       routeTree = sidebarCommunity;
+      clientRouteTree = clientSidebarCommunity;
       break;
     case 'blog':
       routeTree = sidebarBlog;
+      clientRouteTree = clientSidebarBlog;
       break;
   }
   const path = '/' + markdownPath.join('/');
@@ -40,6 +53,7 @@ export default async function Layout({params: {markdownPath = []}}) {
       path={path}
       toc={parsedToc}
       routeTree={routeTree}
+      clientRouteTree={clientRouteTree}
       meta={meta}
       section={section}>
       {parsedContent}

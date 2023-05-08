@@ -1,6 +1,7 @@
 /*
  * Copyright (c) Facebook, Inc. and its affiliates.
  */
+'use client'; // payload size
 
 import {Suspense} from 'react';
 import * as React from 'react';
@@ -12,7 +13,6 @@ import type {RouteItem} from '../getRouteMeta';
 
 declare global {
   interface Window {
-    __theme: string;
     __setPreferredTheme: (theme: string) => void;
   }
 }

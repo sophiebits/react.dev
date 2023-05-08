@@ -1,6 +1,7 @@
 /*
  * Copyright (c) Facebook, Inc. and its affiliates.
  */
+'use client'; // payload size
 
 import NextLink from 'next/link';
 import {memo} from 'react';
